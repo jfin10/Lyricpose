@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio to Sheet Music Transcriber</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>🎵 Audio to Sheet Music Transcriber</h1>
+        <p class="subtitle">Upload audio or video files and get professional four-part sheet music</p>
+
+        <!-- Upload Section -->
+        <div class="upload-section" id="uploadSection">
+            <div class="upload-area" id="uploadArea">
+                <div class="upload-icon">🎼</div>
+                <div class="upload-text">Drop your audio/video file here</div>
+                <div class="upload-hint">or click to browse (MP3, WAV, MP4, MOV, M4A)</div>
+                <input type="file" id="fileInput" accept="audio/*,video/*">
+            </div>
+
+            <div class="info-box">
+                <h3>✨ What This App Does:</h3>
+                <ul>
+                    <li><strong>Audio Analysis:</strong> Extracts melody, harmony, bass, and rhythm from your audio</li>
+                    <li><strong>Four-Part Arrangement:</strong> Creates Soprano, Alto, Tenor, and Bass parts</li>
+                    <li><strong>Professional Notation:</strong> Generates standard musical notation with proper voicing</li>
+                    <li><strong>Multiple Formats:</strong> Export as MusicXML, MIDI, or PDF sheet music</li>
+                    <li><strong>AI-Powered:</strong> Uses advanced machine learning for accurate transcription</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Options Section -->
+        <div class="options-section" id="optionsSection">
+            <h2 style="color: #667eea; margin-bottom: 1.5rem;">Transcription Options</h2>
+            
+            <div class="audio-preview">
+                <audio id="audioPreview" controls></audio>
+                <p style="color: #6c757d; margin-top: 0.5rem;" id="fileName"></p>
+            </div>
+
+            <div class="option-group">
+                <label>Arrangement Style:</label>
+                <select id="arrangementStyle">
+                    <option value="satb">SATB (Soprano, Alto, Tenor, Bass)</option>
+                    <option value="ttbb">TTBB (Tenor 1, Tenor 2, Bass 1, Bass 2)</option>
+                    <option value="ssaa">SSAA (Soprano 1, Soprano 2, Alto 1, Alto 2)</option>
+                    <option value="mixed">Mixed (Smart Auto-detect)</option>
+                </select>
+            </div>
+
+            <div class="option-group">
+                <label>Key Signature (Auto-detect or specify):</label>
+                <select id="keySignature">
+                    <option value="auto">Auto-detect</option>
+                    <option value="C">C Major / A Minor</option>
+                    <option value="G">G Major / E Minor</option>
+                    <option value="D">D Major / B Minor</option>
+                    <option value="A">A Major / F# Minor</option>
+                    <option value="E">E Major / C# Minor</option>
+                    <option value="F">F Major / D Minor</option>
+                    <option value="Bb">Bb Major / G Minor</option>
+                    <option value="Eb">Eb Major / C Minor</option>
+                </select>
+            </div>
+
+            <div class="option-group">
+                <label>Time Signature:</label>
+                <select id="timeSignature">
+                    <option value="auto">Auto-detect</option>
+                    <option value="4/4">4/4 (Common Time)</option>
+                    <option value="3/4">3/4 (Waltz)</option>
+                    <option value="6/8">6/8</option>
+                    <option value="2/4">2/4</option>
+                    <option value="5/4">5/4</option>
+                </select>
+            </div>
+
+            <div class="option-group">
+                <label>Tempo (BPM):</label>
+                <input type="number" id="tempo" value="120" min="40" max="240">
+            </div>
+
+            <div class="option-group">
+                <label>Difficulty Level:</label>
+                <select id="difficulty">
+                    <option value="beginner">Beginner (Simple rhythms)</option>
+                    <option value="intermediate">Intermediate (Moderate complexity)</option>
+                    <option value="advanced">Advanced (Full complexity)</option>
+                </select>
+            </div>
+
+            <div class="option-group">
+                <div class="checkbox-group">
+                    <input type="checkbox" id="includeLyrics">
+                    <label>Include lyrics (if detectable)</label>
+                </div>
+            </div>
+
+            <div class="option-group">
+                <div class="checkbox-group">
+                    <input type="checkbox" id="includeChords">
+                    <label>Include chord symbols</label>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="startTranscription()">🎼 Start Transcription</button>
+                <button class="btn btn-secondary" onclick="resetApp()">Cancel</button>
+            </div>
+        </div>
+
+        <!-- Processing Section -->
+        <div class="processing-section" id="processingSection">
+            <h2 style="color: #667eea; margin-bottom: 1rem;">Processing Your Audio...</h2>
+            <div class="status-text" id="statusText">Analyzing audio file...</div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill">0%</div>
+            </div>
+            <p style="color: #6c757d;">This may take a few minutes depending on the length of your audio.</p>
+        </div>
+
+        <!-- Results Section -->
+        <div class="results-section" id="resultsSection">
+            <h2 style="color: #667eea; margin-bottom: 1.5rem;">✅ Transcription Complete!</h2>
+            
+            <div class="sheet-music-viewer" id="sheetMusicViewer">
+                <div class="voice-part">
+                    <h3>🎤 Soprano</h3>
+                    <div id="sopranoStaff">
+                        <p style="color: #6c757d; font-style: italic;">Sheet music notation will appear here</p>
+                    </div>
+                </div>
+
+                <div class="voice-part">
+                    <h3>🎵 Alto</h3>
+                    <div id="altoStaff">
+                        <p style="color: #6c757d; font-style: italic;">Sheet music notation will appear here</p>
+                    </div>
+                </div>
+
+                <div class="voice-part">
+                    <h3>🎶 Tenor</h3>
+                    <div id="tenorStaff">
+                        <p style="color: #6c757d; font-style: italic;">Sheet music notation will appear here</p>
+                    </div>
+                </div>
+
+                <div class="voice-part">
+                    <h3>🎸 Bass</h3>
+                    <div id="bassStaff">
+                        <p style="color: #6c757d; font-style: italic;">Sheet music notation will appear here</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-success" onclick="downloadPDF()">📄 Download PDF</button>
+                <button class="btn btn-success" onclick="downloadMusicXML()">💾 Download MusicXML</button>
+                <button class="btn btn-success" onclick="downloadMIDI()">🎹 Download MIDI</button>
+                <button class="btn btn-secondary" onclick="resetApp()">Start New Transcription</button>
+            </div>
+
+            <div class="info-box">
+                <h3>📝 Next Steps:</h3>
+                <ul>
+                    <li><strong>PDF:</strong> Print or view the sheet music in any PDF reader</li>
+                    <li><strong>MusicXML:</strong> Import into notation software (Finale, Sibelius, MuseScore)</li>
+                    <li><strong>MIDI:</strong> Use with digital audio workstations (DAWs) or virtual instruments</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
