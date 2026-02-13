@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Audio to Sheet Music Transcriber</title>
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
     <div class="container">
         <h1>🎵 Audio to Sheet Music Transcriber</h1>
@@ -25,7 +27,8 @@
                 <ul>
                     <li><strong>Audio Analysis:</strong> Extracts melody, harmony, bass, and rhythm from your audio</li>
                     <li><strong>Four-Part Arrangement:</strong> Creates Soprano, Alto, Tenor, and Bass parts</li>
-                    <li><strong>Professional Notation:</strong> Generates standard musical notation with proper voicing</li>
+                    <li><strong>Professional Notation:</strong> Generates standard musical notation with proper voicing
+                    </li>
                     <li><strong>Multiple Formats:</strong> Export as MusicXML, MIDI, or PDF sheet music</li>
                     <li><strong>AI-Powered:</strong> Uses advanced machine learning for accurate transcription</li>
                 </ul>
@@ -35,7 +38,7 @@
         <!-- Options Section -->
         <div class="options-section" id="optionsSection">
             <h2 style="color: #667eea; margin-bottom: 1.5rem;">Transcription Options</h2>
-            
+
             <div class="audio-preview">
                 <audio id="audioPreview" controls></audio>
                 <p style="color: #6c757d; margin-top: 0.5rem;" id="fileName"></p>
@@ -125,7 +128,7 @@
         <!-- Results Section -->
         <div class="results-section" id="resultsSection">
             <h2 style="color: #667eea; margin-bottom: 1.5rem;">✅ Transcription Complete!</h2>
-            
+
             <div class="sheet-music-viewer" id="sheetMusicViewer">
                 <div class="voice-part">
                     <h3>🎤 Soprano</h3>
@@ -173,6 +176,9 @@
             </div>
         </div>
     </div>
+    <script src="https://unpkg.com/vexflow/releases/vexflow-debug.js"></script>
+    <script src="https://unpkg.com/tone"></script>
     <script src="script.js"></script>
 </body>
+
 </html>
