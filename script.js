@@ -622,33 +622,46 @@ function downloadPDF() {
         return;
     }
     
-    // Generate PDF using html2canvas and jsPDF
-    const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF();
-    
-    const promises = [];
-    const parts = ['soprano', 'alto', 'tenor', 'bass'];
-    
-    parts.forEach((part, index) => {
-        const element = document.getElementById(`${part}Staff`);
-        if (element.querySelector('svg')) {
-            promises.push(
-                html2canvas(element).then(canvas => {
-                    const imgData = canvas.toDataURL('image/png');
-                    if (index === 0) pdf.addImage(imgData, 'PNG', 10, 10, 190, 50);
-                    else if (index < 3) pdf.addPage().addImage(imgData, 'PNG', 10, 10, 190, 50);
-                    else pdf.addImage(imgData, 'PNG', 10, 70, 190, 50);
-                })
-            );
-        }
-    });
-    
-    Promise.all(promises).then(() => {
-        pdf.save('sheet-music.pdf');
-    }).catch(err => {
-        console.error('PDF generation failed:', err);
-        alert('PDF generation failed. Please try again.');
-    });
+    try {
+        // Use browser's print functionality as a fallback PDF generation
+        const printContent = document.getElementById('sheetMusicViewer').innerHTML;
+        const printWindow = window.open('', '_blank');
+        
+        printWindow.document.write(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Sheet Music - Audio Transcription</title>
+                <style>
+                    body { font-family: Arial, sans-serif; margin: 20px; }
+                    .voice-part { margin-bottom: 30px; page-break-inside: avoid; }
+                    h3 { color: #667eea; }
+                    @media print {
+                        .voice-part { page-break-inside: avoid; }
+                        h3 { color: #000 !important; }
+                    }
+                </style>
+            </head>
+            <body>
+                <h1>Audio Transcription - Sheet Music</h1>
+                <p>Tempo: ${transcriptionData.tempo} BPM | Time Signature: ${transcriptionData.timeSignature} | Key: ${transcriptionData.key}</p>
+                ${printContent}
+                <script>
+                    window.onload = function() {
+                        setTimeout(() => {
+                            window.print();
+                        }, 500);
+                    }
+                </script>
+            </body>
+            </html>
+        `);
+        
+        printWindow.document.close();
+    } catch (error) {
+        console.error('PDF generation failed:', error);
+        alert('PDF generation failed. Please try using the browser print function (Ctrl+P) to save as PDF.');
+    }
 }
 
 function downloadMusicXML() {
@@ -657,8 +670,9 @@ function downloadMusicXML() {
         return;
     }
     
-    const harmony = generateFourPartHarmony(transcriptionData.notes);
-    let xml = `<?xml version="1.0" encoding="UTF-8"?>
+    try {
+        const harmony = generateFourPartHarmony(transcriptionData.notes);
+        let xml = `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE score-partwise PUBLIC "-//Recordare//DTD MusicXML 3.1 Partwise//EN" "http://www.musicxml.org/dtds/partwise.dtd">
 <score-partwise version="3.1">
   <part-list>
@@ -675,50 +689,85 @@ function downloadMusicXML() {
       <part-name>Bass</part-name>
     </score-part>
   </part-list>`;
-    
-    Object.keys(harmony).forEach((voice, voiceIndex) => {
-        const partId = `P${voiceIndex + 1}`;
-        xml += `\n  <part id="${partId}">`;
         
-        let measure = 1;
-        xml += `\n    <measure number="${measure}">`;
-        xml += `\n      <attributes>`;
-        xml += `\n        <divisions>4</divisions>`;
-        xml += `\n        <key><fifths>0</fifths></key>`;
-        xml += `\n        <time><beats>4</beats><beat-type>4</beat-type></time>`;
-        xml += `\n        <clef><sign>${voice === 'tenor' || voice === 'bass' ? 'F' : 'G'}</sign><line>${voice === 'tenor' || voice === 'bass' ? '4' : '2'}</line></clef>`;
-        xml += `\n      </attributes>`;
-        
-        harmony[voice].forEach(note => {
-            const noteName = note.keys[0].split('/')[0].toUpperCase();
-            const octave = note.keys[0].split('/')[1];
-            const duration = note.duration === 'w' ? '16' : note.duration === 'h' ? '8' : note.duration === 'q' ? '4' : '2';
+        Object.keys(harmony).forEach((voice, voiceIndex) => {
+            const partId = `P${voiceIndex + 1}`;
+            xml += `\n  <part id="${partId}">`;
             
-            xml += `\n      <note>`;
-            xml += `\n        <pitch>`;
-            xml += `\n          <step>${noteName.replace('#', '').replace('B', 'B')}</step>`;
-            if (noteName.includes('#')) xml += `\n          <alter>1</alter>`;
-            if (noteName.includes('B')) xml += `\n          <alter>-1</alter>`;
-            xml += `\n          <octave>${octave}</octave>`;
-            xml += `\n        </pitch>`;
-            xml += `\n        <duration>${duration}</duration>`;
-            xml += `\n        <type>${note.duration}</type>`;
-            xml += `\n      </note>`;
+            let measure = 1;
+            let currentMeasureNotes = [];
+            let beatsInMeasure = 0;
+            const beatsPerMeasure = parseInt(transcriptionData.timeSignature.split('/')[0]);
+            
+            harmony[voice].forEach((note, noteIndex) => {
+                const duration = note.duration;
+                let durationValue = 4; // default quarter note
+                
+                switch(duration) {
+                    case 'w': durationValue = 1; break;
+                    case 'h': durationValue = 2; break;
+                    case 'q': durationValue = 4; break;
+                    case '8': durationValue = 8; break;
+                    case '16': durationValue = 16; break;
+                }
+                
+                currentMeasureNotes.push(`
+          <note>
+            <pitch>
+              <step>${note.keys[0].split('/')[0].replace('#', '#').replace('b', 'b')}</step>
+              <octave>${note.keys[0].split('/')[1]}</octave>
+            </pitch>
+            <duration>${durationValue}</duration>
+            <type>${duration}</type>
+          </note>`);
+                
+                beatsInMeasure += 4 / durationValue;
+                
+                if (beatsInMeasure >= beatsPerMeasure || noteIndex === harmony[voice].length - 1) {
+                    xml += `
+    <measure number="${measure}">
+      <attributes>
+        <divisions>${durationValue}</divisions>
+        <key>
+          <fifths>0</fifths>
+        </key>
+        <time>
+          <beats>${beatsPerMeasure}</beats>
+          <beat-type>4</beat-type>
+        </time>
+        <clef>
+          <sign>${voice === 'tenor' || voice === 'bass' ? 'F' : 'G'}</sign>
+          <line>4</line>
+        </clef>
+      </attributes>${currentMeasureNotes.join('')}
+    </measure>`;
+                    
+                    currentMeasureNotes = [];
+                    beatsInMeasure = 0;
+                    measure++;
+                }
+            });
+            
+            xml += `\n  </part>`;
         });
         
-        xml += `\n    </measure>`;
-        xml += `\n  </part>`;
-    });
-    
-    xml += '\n</score-partwise>';
-    
-    const blob = new Blob([xml], { type: 'application/xml' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'sheet-music.musicxml';
-    a.click();
-    URL.revokeObjectURL(url);
+        xml += `\n</score-partwise>`;
+        
+        // Create and download the file
+        const blob = new Blob([xml], { type: 'application/xml' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'sheet-music.xml';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+    } catch (error) {
+        console.error('MusicXML generation failed:', error);
+        alert('MusicXML generation failed. Please try again.');
+    }
 }
 
 function downloadMIDI() {
@@ -727,88 +776,144 @@ function downloadMIDI() {
         return;
     }
     
-    // Create a simple MIDI file using basic MIDI format
-    const midiData = createMIDIFile(transcriptionData.notes, detectedTempo);
-    
-    const blob = new Blob([midiData], { type: 'audio/midi' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'sheet-music.mid';
-    a.click();
-    URL.revokeObjectURL(url);
+    try {
+        // Create a simple MIDI file using base64 encoding
+        const harmony = generateFourPartHarmony(transcriptionData.notes);
+        const tempo = transcriptionData.tempo;
+        const ticksPerQuarter = 480;
+        
+        // MIDI file header
+        const header = 'MThd\x00\x00\x00\x06\x00\x01\x00\x04\x01\x60';
+        
+        // Calculate tempo in microseconds per quarter note
+        const microsecondsPerQuarter = Math.round(60000000 / tempo);
+        const tempoBytes = [
+            (microsecondsPerQuarter >> 16) & 0xFF,
+            (microsecondsPerQuarter >> 8) & 0xFF,
+            microsecondsPerQuarter & 0xFF
+        ];
+        
+        let tracks = [];
+        
+        // Create track for each voice
+        Object.keys(harmony).forEach((voice) => {
+            let track = 'MTrk';
+            let trackData = [];
+            
+            // Set tempo
+            trackData.push(0x00, 0xFF, 0x51, 0x03, ...tempoBytes);
+            
+            // Set instrument (different for each voice)
+            const instrument = voice === 'soprano' ? 0x00 : 
+                              voice === 'alto' ? 0x10 : 
+                              voice === 'tenor' ? 0x20 : 0x30;
+            trackData.push(0x00, 0xC0, instrument);
+            
+            let currentTime = 0;
+            
+            harmony[voice].forEach((note) => {
+                const noteName = note.keys[0];
+                const [noteStr, octave] = noteName.split('/');
+                const noteNumber = getMIDINoteNumber(noteStr, parseInt(octave));
+                
+                if (noteNumber !== null) {
+                    // Note duration in ticks
+                    let duration = ticksPerQuarter; // default quarter note
+                    switch(note.duration) {
+                        case 'w': duration = ticksPerQuarter * 4; break;
+                        case 'h': duration = ticksPerQuarter * 2; break;
+                        case 'q': duration = ticksPerQuarter; break;
+                        case '8': duration = ticksPerQuarter / 2; break;
+                        case '16': duration = ticksPerQuarter / 4; break;
+                    }
+                    
+                    // Note on
+                    trackData.push(...writeVariableLength(currentTime), 0x90, noteNumber, 0x64);
+                    // Note off
+                    trackData.push(...writeVariableLength(duration), 0x80, noteNumber, 0x40);
+                    
+                    currentTime += duration;
+                }
+            });
+            
+            // End of track
+            trackData.push(0x00, 0xFF, 0x2F, 0x00);
+            
+            // Add track length
+            const trackLength = trackData.length;
+            track += String.fromCharCode(
+                (trackLength >> 24) & 0xFF,
+                (trackLength >> 16) & 0xFF,
+                (trackLength >> 8) & 0xFF,
+                trackLength & 0xFF
+            );
+            
+            // Add track data
+            track += String.fromCharCode(...trackData);
+            tracks.push(track);
+        });
+        
+        // Combine all tracks
+        const midiFile = header + tracks.join('');
+        
+        // Convert to base64 and download
+        const base64 = btoa(midiFile);
+        const dataUri = 'data:audio/midi;base64,' + base64;
+        
+        const a = document.createElement('a');
+        a.href = dataUri;
+        a.download = 'sheet-music.mid';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        
+    } catch (error) {
+        console.error('MIDI generation failed:', error);
+        alert('MIDI generation failed. Please try again.');
+    }
 }
 
-function createMIDIFile(notes, tempo) {
-    // MIDI file header
-    const header = 'MThd\x00\x00\x00\x06\x00\x00\x00\x01\x00\x60'; // Format 0, 1 track, 96 ticks per quarter note
+function getMIDINoteNumber(noteStr, octave) {
+    const noteMap = {
+        'c': 0, 'c#': 1, 'd': 2, 'd#': 3, 'e': 4, 'f': 5,
+        'f#': 6, 'g': 7, 'g#': 8, 'a': 9, 'a#': 10, 'b': 11
+    };
     
-    // Convert tempo to microseconds per quarter note
-    const microsecondsPerQuarter = Math.round(60000000 / tempo);
+    const baseNote = noteMap[noteStr.toLowerCase()];
+    if (baseNote === undefined) return null;
     
-    // Track header
-    let track = 'MTrk';
-    
-    // Track events will be added here
-    const events = [];
-    
-    // Set tempo
-    events.push(0x00, 0xFF, 0x51, 0x03, 
-        (microsecondsPerQuarter >> 16) & 0xFF,
-        (microsecondsPerQuarter >> 8) & 0xFF,
-        microsecondsPerQuarter & 0xFF);
-    
-    // Add notes
-    let currentTime = 0;
-    notes.forEach(note => {
-        const noteName = note.keys[0];
-        const [noteStr, octave] = noteName.split('/');
-        const noteNum = noteStrings.indexOf(noteStr.replace('#', '#').replace('b', 'b'));
-        const midiNote = (parseInt(octave) + 1) * 12 + noteNum;
-        
-        const duration = note.duration === 'w' ? 96 : note.duration === 'h' ? 48 : note.duration === 'q' ? 24 : 12;
-        
-        // Note on
-        const deltaTimeOn = currentTime > 0 ? currentTime : 0;
-        events.push(...writeVariableLength(deltaTimeOn), 0x90, midiNote, 0x64); // Note on with velocity 100
-        
-        // Note off
-        events.push(...writeVariableLength(duration), 0x80, midiNote, 0x40); // Note off with velocity 64
-        
-        currentTime = 0; // Reset for next note
-    });
-    
-    // End of track
-    events.push(0x00, 0xFF, 0x2F, 0x00);
-    
-    // Calculate track length
-    const trackLength = events.length;
-    track += String.fromCharCode(
-        (trackLength >> 24) & 0xFF,
-        (trackLength >> 16) & 0xFF,
-        (trackLength >> 8) & 0xFF,
-        trackLength & 0xFF
-    );
-    
-    // Convert events to bytes
-    for (const event of events) {
-        track += String.fromCharCode(event);
-    }
-    
-    return header + track;
+    return baseNote + (octave + 1) * 12;
 }
 
 function writeVariableLength(value) {
     const bytes = [];
-    let buffer = value & 0x7F;
-    
-    while ((value >>= 7) > 0) {
-        buffer <<= 8;
-        buffer |= ((value & 0x7F) | 0x80);
-        bytes.unshift(buffer & 0xFF);
-        buffer = value & 0x7F;
-    }
-    
-    bytes.unshift(buffer);
+    do {
+        let byte = value & 0x7F;
+        value >>= 7;
+        if (value !== 0) byte |= 0x80;
+        bytes.push(byte);
+    } while (value !== 0);
     return bytes;
+}
+
+// Update file handling to auto-start transcription
+function handleFileUpload(file) {
+    if (!file.type.match('audio.*') && !file.type.match('video.*')) {
+        alert('Please upload an audio or video file (MP3, WAV, MP4, MOV, M4A)');
+        return;
+    }
+
+    uploadedFile = file;
+    const url = URL.createObjectURL(file);
+    
+    // Set audio preview
+    const audioPreview = document.getElementById('audioPreview');
+    const fileName = document.getElementById('fileName');
+    audioPreview.src = url;
+    fileName.textContent = file.name;
+    
+    // Auto-start transcription after a short delay
+    setTimeout(() => {
+        startTranscription();
+    }, 1000);
 }
