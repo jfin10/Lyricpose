@@ -12,7 +12,7 @@ body {
     padding: 2rem;
 }
 
-.container {
+.App {
     max-width: 1200px;
     margin: 0 auto;
 }
@@ -78,10 +78,6 @@ h1 {
     font-size: 0.95rem;
 }
 
-input[type="file"] {
-    display: none;
-}
-
 /* Options Section */
 .options-section {
     background: rgba(255, 255, 255, 0.95);
@@ -89,7 +85,11 @@ input[type="file"] {
     padding: 2rem;
     border-radius: 15px;
     margin-bottom: 2rem;
-    display: none;
+}
+
+.options-section h2 {
+    color: #667eea;
+    margin-bottom: 1.5rem;
 }
 
 .option-group {
@@ -130,7 +130,11 @@ select, input[type="number"], input[type="text"] {
     padding: 3rem;
     border-radius: 15px;
     text-align: center;
-    display: none;
+}
+
+.processing-section h2 {
+    color: #667eea;
+    margin-bottom: 1rem;
 }
 
 .progress-bar {
@@ -166,7 +170,11 @@ select, input[type="number"], input[type="text"] {
     color: #333;
     padding: 3rem;
     border-radius: 15px;
-    display: none;
+}
+
+.results-section h2 {
+    color: #667eea;
+    margin-bottom: 1.5rem;
 }
 
 .sheet-music-viewer {
@@ -188,6 +196,26 @@ select, input[type="number"], input[type="text"] {
 .voice-part h3 {
     color: #667eea;
     margin-bottom: 0.5rem;
+}
+
+/* Lyrics Display */
+.lyrics-display {
+    background: #f0f8ff;
+    border-left: 4px solid #667eea;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+}
+
+.lyrics-display h4 {
+    color: #667eea;
+    margin-bottom: 0.5rem;
+    font-size: 1.1rem;
+}
+
+.lyrics-display p {
+    color: #333;
+    line-height: 1.5;
 }
 
 /* Buttons */
@@ -249,26 +277,6 @@ select, input[type="number"], input[type="text"] {
 
 .info-box li {
     margin-bottom: 0.5rem;
-}
-
-/* Lyrics Display */
-.lyrics-display {
-    background: #f0f8ff;
-    border-left: 4px solid #667eea;
-    padding: 1rem;
-    border-radius: 8px;
-    margin-bottom: 1.5rem;
-}
-
-.lyrics-display h4 {
-    color: #667eea;
-    margin-bottom: 0.5rem;
-    font-size: 1.1rem;
-}
-
-.lyrics-display p {
-    color: #333;
-    line-height: 1.5;
 }
 
 /* Audio Preview */

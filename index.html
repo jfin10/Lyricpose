@@ -36,84 +36,25 @@
         </div>
 
         <!-- Options Section -->
-        <div class="options-section" id="optionsSection">
-            <h2 style="color: #667eea; margin-bottom: 1.5rem;">Transcription Options</h2>
-
+        <section id="optionsSection" class="options-section" style="display: none;">
+            <h2>Transcription Options</h2>
+            
             <div class="audio-preview">
-                <audio id="audioPreview" controls></audio>
-                <p style="color: #6c757d; margin-top: 0.5rem;" id="fileName"></p>
-            </div>
-
-            <div class="option-group">
-                <label>Arrangement Style:</label>
-                <select id="arrangementStyle">
-                    <option value="satb">SATB (Soprano, Alto, Tenor, Bass)</option>
-                    <option value="ttbb">TTBB (Tenor 1, Tenor 2, Bass 1, Bass 2)</option>
-                    <option value="ssaa">SSAA (Soprano 1, Soprano 2, Alto 1, Alto 2)</option>
-                    <option value="mixed">Mixed (Smart Auto-detect)</option>
-                </select>
-            </div>
-
-            <div class="option-group">
-                <label>Key Signature (Auto-detect or specify):</label>
-                <select id="keySignature">
-                    <option value="auto">Auto-detect</option>
-                    <option value="C">C Major / A Minor</option>
-                    <option value="G">G Major / E Minor</option>
-                    <option value="D">D Major / B Minor</option>
-                    <option value="A">A Major / F# Minor</option>
-                    <option value="E">E Major / C# Minor</option>
-                    <option value="F">F Major / D Minor</option>
-                    <option value="Bb">Bb Major / G Minor</option>
-                    <option value="Eb">Eb Major / C Minor</option>
-                </select>
-            </div>
-
-            <div class="option-group">
-                <label>Time Signature:</label>
-                <select id="timeSignature">
-                    <option value="auto">Auto-detect</option>
-                    <option value="4/4">4/4 (Common Time)</option>
-                    <option value="3/4">3/4 (Waltz)</option>
-                    <option value="6/8">6/8</option>
-                    <option value="2/4">2/4</option>
-                    <option value="5/4">5/4</option>
-                </select>
-            </div>
-
-            <div class="option-group">
-                <label>Tempo (BPM):</label>
-                <input type="number" id="tempo" value="120" min="40" max="240">
-            </div>
-
-            <div class="option-group">
-                <label>Difficulty Level:</label>
-                <select id="difficulty">
-                    <option value="beginner">Beginner (Simple rhythms)</option>
-                    <option value="intermediate">Intermediate (Moderate complexity)</option>
-                    <option value="advanced">Advanced (Full complexity)</option>
-                </select>
-            </div>
-
-            <div class="option-group">
-                <div class="checkbox-group">
-                    <input type="checkbox" id="includeLyrics">
-                    <label>Include lyrics (if detectable)</label>
-                </div>
-            </div>
-
-            <div class="option-group">
-                <div class="checkbox-group">
-                    <input type="checkbox" id="includeChords">
-                    <label>Include chord symbols</label>
-                </div>
+                <audio id="audioPreview" controls>
+                    Your browser does not support the audio element.
+                </audio>
+                <p id="fileName">No file selected</p>
             </div>
 
             <div class="button-group">
-                <button class="btn btn-primary" onclick="startTranscription()">🎼 Start Transcription</button>
-                <button class="btn btn-secondary" onclick="resetApp()">Cancel</button>
+                <button class="btn btn-primary" onclick="startTranscription()">
+                    🎼 Start Transcription
+                </button>
+                <button class="btn btn-secondary" onclick="resetApp()">
+                    Cancel
+                </button>
             </div>
-        </div>
+        </section>
 
         <!-- Processing Section -->
         <div class="processing-section" id="processingSection">
@@ -178,6 +119,9 @@
     </div>
     <script src="https://unpkg.com/vexflow/releases/vexflow-debug.js"></script>
     <script src="https://unpkg.com/tone"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/midifile@2.0.0/dist/MIDIFile.min.js"></script>
     <script src="script.js"></script>
 </body>
 

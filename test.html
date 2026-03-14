@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Audio Transcription</title>
+</head>
+<body>
+    <h1>Testing Download Functions</h1>
+    <button onclick="testDownloads()">Test Downloads</button>
+    <script>
+        function testDownloads() {
+            // Create mock transcription data
+            window.transcriptionData = {
+                notes: [
+                    { keys: ['c/4'], duration: 'q' },
+                    { keys: ['d/4'], duration: 'q' },
+                    { keys: ['e/4'], duration: 'q' },
+                    { keys: ['f/4'], duration: 'q' }
+                ],
+                tempo: 120,
+                timeSignature: '4/4',
+                key: 'C'
+            };
+            
+            // Load the main script
+            const script = document.createElement('script');
+            script.src = 'script.js';
+            script.onload = () => {
+                console.log('Script loaded, testing downloads...');
+                setTimeout(() => {
+                    try {
+                        window.downloadPDF();
+                        console.log('PDF download initiated');
+                    } catch(e) {
+                        console.error('PDF error:', e);
+                    }
+                    
+                    try {
+                        window.downloadMusicXML();
+                        console.log('MusicXML download initiated');
+                    } catch(e) {
+                        console.error('MusicXML error:', e);
+                    }
+                    
+                    try {
+                        window.downloadMIDI();
+                        console.log('MIDI download initiated');
+                    } catch(e) {
+                        console.error('MIDI error:', e);
+                    }
+                }, 1000);
+            };
+            document.head.appendChild(script);
+        }
+    </script>
+</body>
+</html>
