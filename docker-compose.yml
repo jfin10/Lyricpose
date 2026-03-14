@@ -1,0 +1,34 @@
+version: "3.8"
+
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - BACKEND_URL=http://backend:8000
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=sqlite+aiosqlite:///./lyricpose.db
+      - SECRET_KEY=${SECRET_KEY:-change-me-to-a-random-secret-key}
+      - WHISPER_MODEL=${WHISPER_MODEL:-base}
+      - MAX_FILE_SIZE_MB=${MAX_FILE_SIZE_MB:-100}
+    volumes:
+      - backend_data:/app/uploads
+      - backend_db:/app
+    restart: unless-stopped
+
+volumes:
+  backend_data:
+  backend_db:
